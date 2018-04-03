@@ -1,3 +1,4 @@
+
 module ForwardUnit(ID_EX_RS,ID_EX_RT,
                    EX_MEM_RD,MEM_WB_RD,
                    ForwardA,ForwardB,
@@ -11,31 +12,49 @@ output reg [1:0] ForwardA,ForwardB;
 
 always @*
 begin
+
 if((MEM_RegWrite==1)&&
    (EX_MEM_RD!=0)&&
    (EX_MEM_RD == ID_EX_RS))
    ForwardA <= 10;
 
-if((MEM_RegWrite == 1)&&
-   (EX_MEM_RD != 0)&&
-   (EX_MEM_RD == ID_EX_RT))
-     ForwardB <= 10;
-
-///////////////////////////////////////////////////////////////
- //MemForwardUnit
-
-if((WB_RegWrite == 1)&&
+ else if((WB_RegWrite == 1)&&
    (MEM_WB_RD != 0)&&
    (EX_MEM_RD!= ID_EX_RS)&&
    (MEM_WB_RD == ID_EX_RS))
  ForwardA <= 01;
 
-if((WB_RegWrite == 1)&&
+else 
+begin
+ForwardA <= 0;
+end
+
+if((MEM_RegWrite == 1)&&
+   (EX_MEM_RD != 0)&&
+   (EX_MEM_RD == ID_EX_RT))
+     ForwardB <= 10;
+ 
+else if((WB_RegWrite == 1)&&
    (MEM_WB_RD != 0)&&
    (EX_MEM_RD != ID_EX_RT)&&
    (MEM_WB_RD == ID_EX_RT))
  ForwardB <= 01;
 
+
+else 
+begin
+ForwardB <= 0;
+end
+
+///////////////////////////////////////////////////////////////
+ //MemForwardUnit
+
+
+
+
+
+
+
 end
 endmodule
-
+//////////////////////////////////////////////////////////////////forwading unit end

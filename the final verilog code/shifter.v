@@ -1,7 +1,15 @@
+
 module sh_by2(in,out);
-input[31:0]in;
-output[31:0]out;
-assign out = in << 2;
+input signed [31:0]in;
+output reg[31:0]out;
+
+always @*
+begin
+if(in>0)
+out <= (in<<2)+16;
+else
+ out <= (in<<2)-4;
+end
 endmodule
 
 // >>//////////////////// sign extend ////////////////////////
@@ -37,3 +45,5 @@ end
 assign out = add;
 
 endmodule
+
+// >>//////////////////// adder //////////////////////////////end

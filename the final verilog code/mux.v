@@ -1,3 +1,4 @@
+
 module mux_2x1_5(ip0, ip1, sel, out);
 input sel;
 input [4:0] ip1;
@@ -57,8 +58,3 @@ begin
 end
 
 endmodule 
-
-
-
-
-

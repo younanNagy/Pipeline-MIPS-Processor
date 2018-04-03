@@ -38,7 +38,7 @@ reg [3:0] alu_ctrl;
 assign RegDest   = (opcode==6'b0);
 assign ALUSrc    = (opcode!=6'b0) && (opcode!=`BEQ) && (opcode!=`BNE);
 assign MemtoReg  = (opcode==`LW);
-assign RegWrite  = (opcode == `Rf) || (opcode == `LW);
+assign RegWrite  = (opcode == `Rf) || (opcode == `LW) || (opcode == `ADDI) || (opcode == `ANDI) ||(opcode == `SLTI)|| (opcode == `ORI)  ;
 assign MemRead   = (opcode==`LW);
 assign MemWrite  = (opcode==`SW);
 assign jcond = (opcode ==`J);
@@ -65,29 +65,4 @@ end
 assign ALU_Control = alu_ctrl;
 
 endmodule
-
-
-module testControlUnit;
-   reg [5:0]opcode,funct;
-   wire bcond,jcond,RegDest,ALUSrc,MemtoReg,RegWrite,MemRead,MemWrite;  
-   wire [3:0] ALU_Control;                            
-        
-
-
-initial
-begin
-$monitor($time,"opcode=%d,funct=%d,bcond=%d,jcond=%d,RegDest=%d,ALUSrc=%d,ALU_Control=%d,MemtoReg=%d,RegWrite=%d,MemRead=%d,MemWrite=%d",
-opcode,funct,bcond,jcond,RegDest,ALUSrc,ALU_Control,MemtoReg,RegWrite,MemRead,MemWrite);
-           
-
-#1 opcode = 0 ; funct = 32; // and
-#2 opcode = 'b 101011 ; // SW
-#3 opcode = 'b  100011 ; // LW 
-
-end
-
-control_unit cu1(opcode,funct,RegDest,ALUSrc,MemtoReg,RegWrite,MemRead,MemWrite,ALU_Control,jcond,bcond);
-
-endmodule
-
 

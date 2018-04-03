@@ -1,3 +1,4 @@
+
 module pc(clk,We,pc_enable,in_address,out_address);
 
 input clk,We,pc_enable;
@@ -28,16 +29,5 @@ end
 
 endmodule
 
-/*
 
-always @(posedge clk)
-begin
-if(pc_enable)
-out_address<= in_address;
-end  
-always @(negedge We)
-begin
-out_address <=0;
-end
-endmodule
-*/
+//////////////////////////////////////////////////////////////////////////////////////////////pc counter end

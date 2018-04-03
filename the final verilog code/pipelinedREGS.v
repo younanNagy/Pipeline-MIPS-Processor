@@ -1,3 +1,4 @@
+
 module IF_ID(clk,
              input_pc,output_pc,
              input_Inst,output_Inst
@@ -7,10 +8,12 @@ input clk;
 output reg [31:0] output_pc,output_Inst;
 always @(posedge clk)
 begin
+
 output_pc <= input_pc;
 output_Inst <= input_Inst;
 end  
 endmodule
+
 
 module  ID_EX (clk,
                input_pc,output_pc,
@@ -54,6 +57,7 @@ output_RTData <= input_RTData;
 output_RSAddress<=input_RSAddress;
 output_RTAddress<=input_RTAddress;
 output_RDAddress <= input_RDAddress;
+//#1 ------------------------------------------------------------------------------------>
 output_SignExtended <= input_SignExtended;
 output_sh_amount<=input_sh_amount;
 output_RegDst<=input_RegDst;
@@ -128,6 +132,7 @@ end
 endmodule
 
 module MEM_WB (clk,
+	       input_pc,output_pc,
                input_RDAddress,output_RDAddress,
                input_RegDst,output_RegDst,
                input_Jump,output_Jump,
@@ -142,6 +147,8 @@ module MEM_WB (clk,
                input_MemOut,output_MemOut
                );
 input clk;
+input [31:0] input_pc;
+output reg[31:0] output_pc;
 input wire [31:0] input_Alu_Result, input_MemOut;
 output reg [31:0] output_Alu_Result,output_MemOut;
 
@@ -157,8 +164,10 @@ output reg output_RegDst,output_Jump,output_Branch,output_MemRead,output_MemToRe
             output_MemWrite,output_AluSrc,output_RegWrite;
 
 
-always @(posedge clk)
+always @(negedge clk)//34an el reg file yel72 ye2raa
 begin
+
+output_pc <=  input_pc;
 output_RDAddress <= input_RDAddress;
 output_RegDst<=input_RegDst;
 output_Jump<=input_Jump;
@@ -171,34 +180,6 @@ output_RegWrite<=input_RegWrite;
 output_AluOp<=input_AluOp;
 output_Alu_Result <= input_Alu_Result;
 output_MemOut<=input_MemOut;
+
 end  
 endmodule
-
-/*
-module ForwardUnit();
-
-if((EX_MEM.RegWrite)&&(EX_MEM.RD != 0)&&(EX_MEM.RD == ID_EX.RS))
-ForwardA = 10;
-
-if((EX_MEM.RegWrite)&&(EX_MEM.RD != 0)&&(EX_MEM.RD == ID_EX.RT))
-ForwardB = 10;
-
-endmodule
-
-module MemForwardUnit();
-
-if((MEM_WB.RegWrite)&&
-   (MEM_WB.RD != 0)&&
-   (EX_MEM.RD!= ID_EX.RS)&&
-   (MEM_WB.RD == ID_EX.RS))
-ForwardA = 01;
-
-if((MEM_WB.RegWrite)&&
-   (MEM_WB.RD != 0)&&
-   (EX_MEM.RD!= ID_EX.RT)&&
-   (MEM_WB.RD == ID_EX.RT))
-ForwardB = 01;
-
-
-endmodule
-*/

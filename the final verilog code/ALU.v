@@ -1,3 +1,4 @@
+
 module ALU (data1,data2,control_signals,sh_am,zero,overflow,result);
 	input [31:0]data1,data2;
         input [4:0] sh_am;
@@ -45,35 +46,4 @@ module ALU (data1,data2,control_signals,sh_am,zero,overflow,result);
 		
 	end
   
-endmodule
-
-
-
-
-//--------------------------------------------------------------//ALU testbench
-
-module testALU;
-        reg [31:0]data1,data2;
-	reg [3:0] control_signals; 
-	wire zero,overflow;
-	wire [31:0] result;
-        reg [4:0]sh_am;
-
-
-initial
-begin
-$monitor($time, "  R1=%d , R2=%d,control=%d, Result=%d, zeroFlag=%d, overflow=%d",
-               data1,data2,control_signals,result,zero,overflow);
-
-#1 data1 = 1; data2 = 3; control_signals = 0; // and
-#2 data1 = 1; data2 = 3; control_signals = 1; // or
-#3 data1 = 5; data2 = 2; control_signals = 2; // add
-#4 data1 = 3; data2 = -1; control_signals = 2; // add
-#5 data1 = 3; data2 = 2; control_signals = 6; // sub
-#6 data1 = 2147483645; data2 = 9; control_signals = 2; // add
-
-
-end
-
-ALU alu1(data1,data2,control_signals,sh_am,zero,overflow,result);//module ALU (data1,data2,control_signals,sh_am,zero,overflow,result);
 endmodule

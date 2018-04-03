@@ -1,5 +1,5 @@
 
-module processor(write_data,write_address,We,pc_output,ALU_Result,Mem_out,pc_enable,clk);
+module processor(write_data,write_address,We,pc_output,ALU_Result,Mem_out,pc_enable,clk,reg_file_address,reg_file_data);
 
 
 //i/ps o/ps 
@@ -9,13 +9,14 @@ input [7:0] write_data;
 
 
 
-
+input [4:0] reg_file_address;//++++++++++++++
 //Wire Declarations
 
 //pc
 wire [31:0] pc_input;        
-output wire [31:0] pc_output;
+output wire [31:0] pc_output,reg_file_data;//++++++++++++++++++++++++++++++++++++++++++++++++++++
 wire [31:0] pc_plus_4;
+
 
 //pipelined regs
 wire [31:0] Instr_32,ID_Instr_32 ;
@@ -30,6 +31,7 @@ wire [25:0] jump_pseudo = ID_Instr_32[25:0];
 wire [31:0] ID_pc;
 wire [31:0] EX_pc;
 wire [31:0] MEM_pc;
+wire [31:0] WB_pc;
 wire [31:0] EX_sign_extended;
 wire [31:0] MEM_ALU_Result;
 wire [31:0] MEM_branch_address;
@@ -85,18 +87,19 @@ wire [31:0] offset;
 //jump
 wire [1:0] two_zeros =  0;
 wire [31:0]jump_address = { ID_pc [31:28] , jump_pseudo   , two_zeros };
+wire  [31:0]actual_jump_address;
+adder control_hazard (jump_address,20,actual_jump_address);
 
 
 
-
-//IF ------------------------------------
+//IF -----------------------------------
 
 
 pc pc1(clk,We,pc_enable,pc_input,pc_output); 
 InstMem inst1(pc_output,write_address,write_data,We,clk, Instr_32);
 adder adder1(pc_output,4, pc_plus_4);
 mux_2x1_32 mux4(pc_plus_4,MEM_branch_address,takebranch,next_address);
-mux_2x1_32 mux5(next_address,jump_address,jcond,pc_input); 
+mux_2x1_32 mux5(next_address,actual_jump_address,jcond,pc_input); 
 
 IF_ID IF_ID1(.input_pc(pc_plus_4),.input_Inst(Instr_32),
              .output_pc(ID_pc),.output_Inst(ID_Instr_32),
@@ -106,7 +109,7 @@ IF_ID IF_ID1(.input_pc(pc_plus_4),.input_Inst(Instr_32),
 //ID --------------------------------------
 
 control_unit cu1(opcode,funct,RegDest,ALUSrc,MemtoReg,RegWrite,MemRead,MemWrite,ALU_Control,jcond,bcond);
-regFile Reg1(IP_ID_EX_RS,IP_ID_EX_RT ,MEM_WB_address,write_back_data,RegWrite,clk,read_data1,read_data2);
+regFile Reg1(IP_ID_EX_RS,IP_ID_EX_RT ,MEM_WB_address,write_back_data,WB_RegWrite,clk,read_data1,read_data2,reg_file_address,reg_file_data);//++++++++
 signext signex1(immediate_value,sign_extended);
 
 ID_EX ID_EX1  (.clk(clk),
@@ -131,8 +134,9 @@ ID_EX ID_EX1  (.clk(clk),
 
 //EXE
 
-mux_3x1_32  rs_forward(ID_EX_Data1,MEM_ALU_Result,write_back_data,ForwardA,forwardA_out);
-mux_3x1_32  second_operand_forward(ID_EX_Data2,MEM_ALU_Result,write_back_data,ForwardB,forwardB_out);
+
+mux_3x1_32  rs_forward(ID_EX_Data1,write_back_data,MEM_ALU_Result,ForwardA,forwardA_out);
+mux_3x1_32  second_operand_forward(ID_EX_Data2,write_back_data,MEM_ALU_Result,ForwardB,forwardB_out);
 mux_2x1_32 mux2(forwardB_out,EX_sign_extended,EX_AluSrc,ALU_2operand);
 ALU alu1(forwardA_out,ALU_2operand,EX_ALU_Control,EX_shamt,zeroflag,overflow,ALU_Result);
 adder adder2 (offset,EX_pc, branch_address);
@@ -170,8 +174,11 @@ or or1(takebranch,eq_branch,neq_branch);
 
 
 MEM_WB MEM_WB1 (.clk(clk),
+               .input_pc(WB_pc),.output_pc(WB_pc),
                .input_RDAddress(EX_MEM_WB_address),.output_RDAddress(MEM_WB_address),
+
                .input_RegDst(MEM_RegDst),.output_RegDst(WB_RegDst),
+
                .input_Jump(MEM_Jump),.output_Jump(WB_Jump),
                .input_Branch(MEM_Branch),.output_Branch(WB_Branch),
                .input_MemRead(MEM_MemRead),.output_MemRead(WB_MemRead),
@@ -192,7 +199,7 @@ mux_2x1_32 mux3(WB_ALU_Result,WB_Mem_out,WB_MemToReg,write_back_data);
 
 
 
-ForwardUnit FU    (.ID_EX_RS(ID_EX_RS),.ID_EX_RT(ID_EX_RS),
+ForwardUnit FU    (.ID_EX_RS(ID_EX_RS),.ID_EX_RT(ID_EX_RT),
                    .EX_MEM_RD(EX_MEM_WB_address),.MEM_WB_RD(MEM_WB_address),
                    .ForwardA(ForwardA),.ForwardB(ForwardB),
                    .MEM_RegWrite(MEM_RegWrite),
@@ -200,5 +207,3 @@ ForwardUnit FU    (.ID_EX_RS(ID_EX_RS),.ID_EX_RT(ID_EX_RS),
                    );
 endmodule
 // <</////////////////// Processor ///////////////////////////
-
-
